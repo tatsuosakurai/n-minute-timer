@@ -5,7 +5,19 @@ const startButton = document.querySelector("#start-button");
 const pauseButton = document.querySelector("#pause-button");
 const resetButton = document.querySelector("#reset-button");
 
-let totalSeconds = Number(minutesInput.value) * 60;
+function normalizeMinutes(value, fallback = 5) {
+  return Math.max(1, Number.parseInt(value, 10) || fallback);
+}
+
+function readMinutesFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  return normalizeMinutes(params.get("minutes"), 5);
+}
+
+const initialMinutes = readMinutesFromQuery();
+minutesInput.value = initialMinutes;
+
+let totalSeconds = initialMinutes * 60;
 let remainingSeconds = totalSeconds;
 let intervalId = null;
 let isPaused = false;
@@ -82,7 +94,7 @@ function requestNotificationPermission() {
 
 function resetTimer() {
   stopTimer();
-  totalSeconds = Math.max(1, Number(minutesInput.value) || 5) * 60;
+  totalSeconds = normalizeMinutes(minutesInput.value, initialMinutes) * 60;
   remainingSeconds = totalSeconds;
   isPaused = false;
   endTime = null;
@@ -93,7 +105,7 @@ function resetTimer() {
 
 function startTimer() {
   if (!isPaused) {
-    totalSeconds = Math.max(1, Number(minutesInput.value) || 5) * 60;
+    totalSeconds = normalizeMinutes(minutesInput.value, initialMinutes) * 60;
     remainingSeconds = totalSeconds;
   }
 
@@ -116,7 +128,7 @@ function pauseTimer() {
 }
 
 minutesInput.addEventListener("input", () => {
-  totalSeconds = Math.max(1, Number(minutesInput.value) || 5) * 60;
+  totalSeconds = normalizeMinutes(minutesInput.value, initialMinutes) * 60;
   remainingSeconds = totalSeconds;
   syncDisplay();
   setStatus("Set minutes and press start.");
