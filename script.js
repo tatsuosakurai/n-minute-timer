@@ -9,8 +9,24 @@ function normalizeMinutes(value, fallback = 5) {
   return Math.max(1, Number.parseInt(value, 10) || fallback);
 }
 
+function readMinutesFromPath() {
+  const segments = window.location.pathname.split("/").filter(Boolean);
+  const lastSegment = segments.at(-1);
+
+  if (lastSegment === "n-minute-timer") {
+    return null;
+  }
+
+  return normalizeMinutes(lastSegment, 0) || null;
+}
+
 function readMinutesFromQuery() {
   const params = new URLSearchParams(window.location.search);
+  const pathMinutes = readMinutesFromPath();
+  if (pathMinutes !== null) {
+    return pathMinutes;
+  }
+
   return normalizeMinutes(params.get("m") || params.get("minutes"), 5);
 }
 
