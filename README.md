@@ -11,6 +11,8 @@ Simple static timer app built with HTML and JavaScript.
 
 This repository is ready to publish with GitHub Pages from the repository root.
 
+Live site: https://tatsuosakurai.github.io/n-minute-timer/
+
 ## URL Parameters
 
-Open the app with `?minutes=10` to prefill the timer with 10 minutes.
+Open the app with `?m=10` to prefill the timer with 10 minutes.

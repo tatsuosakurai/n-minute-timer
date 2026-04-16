@@ -11,7 +11,7 @@ function normalizeMinutes(value, fallback = 5) {
 
 function readMinutesFromQuery() {
   const params = new URLSearchParams(window.location.search);
-  return normalizeMinutes(params.get("minutes"), 5);
+  return normalizeMinutes(params.get("m") || params.get("minutes"), 5);
 }
 
 const initialMinutes = readMinutesFromQuery();
