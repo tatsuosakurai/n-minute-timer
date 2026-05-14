@@ -5,6 +5,7 @@ Simple static timer app built with HTML and JavaScript.
 ## Files
 
 - `index.html`
+- `404.html`
 - `script.js`
 
 ## GitHub Pages
