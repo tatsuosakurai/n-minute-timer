@@ -9,7 +9,8 @@
       color-scheme: dark;
       --fg: #fffbe6;
       --fg-faint: rgba(255, 251, 230, 0.3);
-      --unfilled: #14142b;
+      --elapsed-color: #dd6815;
+      --remaining-color: #22863f;
     }
 
     * {
@@ -21,7 +22,7 @@
       height: 100%;
       margin: 0;
       overflow: hidden;
-      background: var(--unfilled);
+      background: var(--remaining-color);
     }
 
     body {
@@ -31,7 +32,6 @@
 
     #scene {
       --elapsed-ratio: 0;
-      --bar-color: transparent;
       position: fixed;
       inset: 0;
       display: grid;
@@ -40,14 +40,14 @@
       gap: 8px;
       padding: 0 12px;
       overflow: hidden;
-      background: var(--unfilled);
+      background: var(--remaining-color);
     }
 
     #elapsed-bar {
       position: absolute;
       inset: 0;
       z-index: -1;
-      background: var(--bar-color);
+      background: var(--elapsed-color);
       transform: scaleX(var(--elapsed-ratio));
       transform-origin: left;
     }
