@@ -9,7 +9,6 @@
       color-scheme: dark;
       --fg: #fffbe6;
       --fg-faint: rgba(255, 251, 230, 0.3);
-      --ink: #1a1340;
       --unfilled: #14142b;
     }
 
@@ -38,8 +37,8 @@
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 16px;
-      padding: 0 20px;
+      gap: 8px;
+      padding: 0 12px;
       overflow: hidden;
       background: var(--unfilled);
     }
@@ -73,14 +72,19 @@
 
     #controls {
       display: flex;
-      flex-direction: column;
       align-items: center;
       gap: 6px;
+      opacity: 0.5;
+    }
+
+    /* :focus-within だとボタンをクリックした後も濃いまま残るので、キーボード操作と入力中だけ拾う */
+    #controls:hover,
+    #controls:has(:focus-visible) {
+      opacity: 1;
     }
 
     #buttons {
       display: flex;
-      gap: 8px;
     }
 
     button {
@@ -96,26 +100,15 @@
 
     .icon-btn {
       display: inline-flex;
-      width: 36px;
-      height: 36px;
+      width: 22px;
+      height: 22px;
       align-items: center;
       justify-content: center;
       padding: 0;
       border: none;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .icon-btn.primary {
-      background: var(--fg);
-      color: var(--ink);
-    }
-
-    .icon-btn.ghost {
-      border: 1px solid var(--fg-faint);
       background: transparent;
+      font-size: 12px;
+      line-height: 1;
     }
 
     #minutes-setting {
@@ -123,12 +116,6 @@
       align-items: baseline;
       gap: 2px;
       font-size: 12px;
-      opacity: 0.65;
-    }
-
-    #minutes-setting:hover,
-    #minutes-setting:focus-within {
-      opacity: 1;
     }
 
     #minutes-input {
@@ -165,14 +152,14 @@
     <div id="display" aria-live="polite">05:00</div>
 
     <section id="controls" aria-label="Timer controls">
-      <div id="buttons">
-        <button class="icon-btn primary" id="start-button" type="button" aria-label="スタート">▶</button>
-        <button class="icon-btn ghost" id="reset-button" type="button" aria-label="リセット">↺</button>
-      </div>
       <label id="minutes-setting">
         <input id="minutes-input" type="number" min="1" max="999" step="1" value="5">
         <span>分</span>
       </label>
+      <div id="buttons">
+        <button class="icon-btn" id="start-button" type="button" aria-label="スタート">▶</button>
+        <button class="icon-btn" id="reset-button" type="button" aria-label="リセット">↺</button>
+      </div>
     </section>
   </main>
 
