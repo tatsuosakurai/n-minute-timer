@@ -7,8 +7,10 @@
   <style>
     :root {
       color-scheme: dark;
-      --fg-dark: #1a1340;
-      --fg-light: #fffbe6;
+      --fg: #fffbe6;
+      --fg-faint: rgba(255, 251, 230, 0.3);
+      --ink: #1a1340;
+      --unfilled: #14142b;
     }
 
     * {
@@ -20,103 +22,65 @@
       height: 100%;
       margin: 0;
       overflow: hidden;
-      background: #0a0a2b;
+      background: var(--unfilled);
     }
 
     body {
       font-family: "Helvetica Neue", "Hiragino Sans", system-ui, sans-serif;
-      color: var(--fg-light);
+      color: var(--fg);
     }
 
     #scene {
+      --elapsed-ratio: 0;
+      --bar-color: transparent;
       position: fixed;
       inset: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
       overflow: hidden;
-      transition: background 600ms linear;
+      background: var(--unfilled);
     }
 
-    #sky-svg {
+    #elapsed-bar {
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      z-index: -1;
+      background: var(--bar-color);
+      transform: scaleX(var(--elapsed-ratio));
+      transform-origin: left;
     }
 
     #display {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -55%);
-      font-size: clamp(80px, 13vw, 180px);
+      --char-count: 5;
+      --widest-glyph-em: 0.6;
+      --width-taken-by-controls: 170px;
+      font-size: min(
+        calc((100vw - var(--width-taken-by-controls)) / (var(--char-count) * var(--widest-glyph-em))),
+        68vh
+      );
       font-variant-numeric: tabular-nums;
-      font-weight: 200;
+      font-weight: 700;
       letter-spacing: 0;
-      line-height: 0.95;
+      line-height: 1;
       pointer-events: none;
       text-align: center;
-      transition: color 600ms linear, text-shadow 600ms linear;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
     }
 
     #controls {
-      position: absolute;
-      bottom: 36px;
-      left: 50%;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
-      transform: translateX(-50%);
-      transition: background 600ms linear, color 600ms linear, border 600ms linear;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    #controls .divider {
-      width: 1px;
-      height: 26px;
-    }
-
-    #min-wrap {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 0 8px 0 16px;
-    }
-
-    #minutes-input {
-      width: 56px;
-      padding: 4px 6px;
-      border-radius: 6px;
-      color: inherit;
-      font: inherit;
-      font-size: 24px;
-      font-variant-numeric: tabular-nums;
-      font-weight: 700;
-      outline: none;
-      text-align: right;
-    }
-
-    #minutes-input::-webkit-outer-spin-button,
-    #minutes-input::-webkit-inner-spin-button {
-      margin: 0;
-      -webkit-appearance: none;
-    }
-
-    #minutes-input {
-      -moz-appearance: textfield;
-    }
-
-    #minutes-input:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    .step-col {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #buttons {
+      display: flex;
+      gap: 8px;
     }
 
     button {
@@ -130,148 +94,85 @@
       opacity: 0.4;
     }
 
-    .step {
-      display: inline-flex;
-      width: 18px;
-      height: 14px;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      border-radius: 4px;
-      background: transparent;
-      font-size: 8px;
-      line-height: 1;
-      opacity: 0.85;
-    }
-
     .icon-btn {
       display: inline-flex;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       align-items: center;
       justify-content: center;
       padding: 0;
       border: none;
       border-radius: 999px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       line-height: 1;
     }
 
+    .icon-btn.primary {
+      background: var(--fg);
+      color: var(--ink);
+    }
+
     .icon-btn.ghost {
+      border: 1px solid var(--fg-faint);
       background: transparent;
     }
 
-    .light #display {
-      color: var(--fg-dark);
-      text-shadow: 0 4px 30px rgba(255, 255, 255, 0.4);
+    #minutes-setting {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      font-size: 12px;
+      opacity: 0.65;
     }
 
-    .dark #display {
-      color: var(--fg-light);
-      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.45);
+    #minutes-setting:hover,
+    #minutes-setting:focus-within {
+      opacity: 1;
     }
 
-    .light #controls {
-      border: 1px solid rgba(26, 19, 64, 0.18);
-      background: rgba(255, 251, 230, 0.6);
-      color: var(--fg-dark);
+    #minutes-input {
+      width: 44px;
+      padding: 1px 2px;
+      border: none;
+      border-bottom: 1px solid transparent;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-variant-numeric: tabular-nums;
+      outline: none;
+      text-align: right;
     }
 
-    .dark #controls {
-      border: 1px solid rgba(255, 251, 230, 0.18);
-      background: rgba(20, 18, 40, 0.55);
-      color: var(--fg-light);
+    #minutes-input::-webkit-inner-spin-button {
+      opacity: 1;
     }
 
-    .light .step {
-      border: 1px solid rgba(26, 19, 64, 0.18);
+    #minutes-input:hover:not(:disabled),
+    #minutes-input:focus {
+      border-bottom-color: var(--fg-faint);
     }
 
-    .dark .step {
-      border: 1px solid rgba(255, 251, 230, 0.18);
-    }
-
-    .light #minutes-input {
-      border: 1px dashed rgba(26, 19, 64, 0.18);
-      background: rgba(26, 19, 64, 0.04);
-    }
-
-    .dark #minutes-input {
-      border: 1px dashed rgba(255, 251, 230, 0.18);
-      background: rgba(255, 251, 230, 0.06);
-    }
-
-    .light .divider {
-      background: rgba(26, 19, 64, 0.18);
-    }
-
-    .dark .divider {
-      background: rgba(255, 251, 230, 0.18);
-    }
-
-    .light .icon-btn.primary {
-      background: var(--fg-dark);
-      color: var(--fg-light);
-    }
-
-    .dark .icon-btn.primary {
-      background: var(--fg-light);
-      color: var(--fg-dark);
-    }
-
-    .light .icon-btn.ghost {
-      border: 1px solid rgba(26, 19, 64, 0.18);
-    }
-
-    .dark .icon-btn.ghost {
-      border: 1px solid rgba(255, 251, 230, 0.18);
-    }
-
-    @media (max-width: 520px) {
-      #display {
-        font-size: clamp(64px, 19vw, 96px);
-      }
-
-      #controls {
-        bottom: 20px;
-      }
+    #minutes-input:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
     }
   </style>
 </head>
 <body>
-  <main id="scene" class="light" aria-label="N minute timer">
-    <svg id="sky-svg" preserveAspectRatio="none" aria-hidden="true">
-      <path id="arc-bg" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"></path>
-      <path id="arc-fg" fill="none" stroke="#ffe9b0" stroke-width="3" pathLength="1" stroke-dasharray="1" stroke-linecap="round" opacity="0.85"></path>
-      <circle id="dot-start" r="5" fill="rgba(255,255,255,0.6)"></circle>
-      <circle id="dot-end" r="5" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"></circle>
-      <defs>
-        <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop id="water-top" offset="0" stop-color="#000"></stop>
-          <stop id="water-bot" offset="1" stop-color="#000"></stop>
-        </linearGradient>
-      </defs>
-      <rect id="water" fill="url(#water-grad)"></rect>
-      <line id="horizon" stroke-width="1" opacity="0.55"></line>
-      <circle id="sun-halo" fill="#ff5a2c" opacity="0.18" r="80"></circle>
-      <circle id="sun-glow" fill="#ff5a2c" opacity="0.4" r="50"></circle>
-      <circle id="sun-core" fill="#ffe9b0" r="32"></circle>
-    </svg>
-
+  <main id="scene" aria-label="N minute timer">
+    <div id="elapsed-bar" aria-hidden="true"></div>
     <div id="display" aria-live="polite">05:00</div>
 
     <section id="controls" aria-label="Timer controls">
-      <div id="min-wrap">
-        <input id="minutes-input" type="number" min="1" max="999" step="1" value="5" aria-label="分">
-        <div class="step-col">
-          <button class="step" id="step-up" type="button" aria-label="1分増やす">▲</button>
-          <button class="step" id="step-down" type="button" aria-label="1分減らす">▼</button>
-        </div>
+      <div id="buttons">
+        <button class="icon-btn primary" id="start-button" type="button" aria-label="スタート">▶</button>
+        <button class="icon-btn ghost" id="reset-button" type="button" aria-label="リセット">↺</button>
       </div>
-      <div class="divider"></div>
-      <button class="icon-btn primary" id="start-button" type="button" aria-label="スタート">▶</button>
-      <button class="icon-btn ghost" id="reset-button" type="button" aria-label="リセット">↺</button>
+      <label id="minutes-setting">
+        <input id="minutes-input" type="number" min="1" max="999" step="1" value="5">
+        <span>分</span>
+      </label>
     </section>
   </main>
 
